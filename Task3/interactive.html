@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Quiz</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #333;
+        border-radius: 10px;
+      }
+      h1 {
+        margin-bottom: 30px;
+      }
+      .question {
+        font-size: 1.2em;
+        margin-bottom: 20px;
+      }
+      .options button {
+        display: block;
+        width: 100%;
+        margin: 8px 0;
+        padding: 10px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 5px;
+        border: 1px solid #333;
+        background-color: #f0f0f0;
+        transition: background-color 0.3s ease;
+      }
+      .options button:hover {
+        background-color: #ddd;
+      }
+      #result {
+        margin-top: 20px;
+        font-weight: bold;
+        min-height: 24px;
+      }
+      .nav-buttons {
+        margin-top: 30px;
+      }
+      .nav-buttons button {
+        padding: 10px 20px;
+        margin: 0 10px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 5px;
+        border: 1px solid #333;
+      }
+      .nav-buttons button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Interactive Quiz</h1>
+
+    <div id="quiz-container">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div id="result"></div>
+
+      <div class="nav-buttons">
+        <button id="prevBtn" onclick="prevQuestion()" disabled>Previous</button>
+        <button id="nextBtn" onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+
+    <script>
+      // Quiz data: array of question objects
+      const quiz = [
+        {
+          question: "What is 2 + 2?",
+          options: [3, 4, 5],
+          answer: 4,
+        },
+        {
+          question: "What is the capital of France?",
+          options: ["London", "Berlin", "Paris"],
+          answer: "Paris",
+        },
+        {
+          question: "Which planet is known as the Red Planet?",
+          options: ["Earth", "Mars", "Jupiter"],
+          answer: "Mars",
+        },
+        {
+          question: "What is the boiling point of water?",
+          options: ["90°C", "100°C", "110°C"],
+          answer: "100°C",
+        },
+      ];
+
+      let currentQuestionIndex = 0;
+      let userAnswers = new Array(quiz.length).fill(null);
+
+      const questionEl = document.getElementById("question");
+      const optionsEl = document.getElementById("options");
+      const resultEl = document.getElementById("result");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      function loadQuestion(index) {
+        const q = quiz[index];
+        questionEl.textContent = `Q${index + 1}. ${q.question}`;
+        optionsEl.innerHTML = "";
+        resultEl.textContent = "";
+
+        q.options.forEach((option) => {
+          const btn = document.createElement("button");
+          btn.textContent = option;
+          btn.onclick = () => selectAnswer(option);
+          optionsEl.appendChild(btn);
+        });
+
+        // If user has answered already, show feedback
+        if (userAnswers[index] !== null) {
+          showResult(userAnswers[index]);
+        }
+
+        // Disable prev button on first question
+        prevBtn.disabled = index === 0;
+
+        // Change next button text on last question
+        nextBtn.textContent = index === quiz.length - 1 ? "Finish" : "Next";
+      }
+
+      function selectAnswer(selected) {
+        userAnswers[currentQuestionIndex] = selected;
+        showResult(selected);
+      }
+
+      function showResult(selected) {
+        const correctAnswer = quiz[currentQuestionIndex].answer;
+        if (selected === correctAnswer) {
+          resultEl.textContent = "Correct!";
+          resultEl.style.color = "green";
+        } else {
+          resultEl.textContent = `Wrong! Correct answer: ${correctAnswer}`;
+          resultEl.style.color = "red";
+        }
+      }
+
+      function nextQuestion() {
+        if (currentQuestionIndex === quiz.length - 1) {
+          // Show final score
+          let score = userAnswers.reduce((acc, ans, i) => {
+            return acc + (ans === quiz[i].answer ? 1 : 0);
+          }, 0);
+          questionEl.textContent = `Quiz Completed! Your score: ${score} / ${quiz.length}`;
+          optionsEl.innerHTML = "";
+          resultEl.textContent = "";
+          prevBtn.style.display = "none";
+          nextBtn.style.display = "none";
+          return;
+        }
+        currentQuestionIndex++;
+        loadQuestion(currentQuestionIndex);
+      }
+
+      function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex--;
+          loadQuestion(currentQuestionIndex);
+        }
+      }
+
+      // Initialize quiz
+      loadQuestion(currentQuestionIndex);
+    </script>
+  </body>
+</html>
